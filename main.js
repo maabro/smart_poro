@@ -6,10 +6,23 @@ require('dotenv').config();
 const fs = require('fs');
 const { prefix } = require('./config.json');
 const Discord = require('discord.js');
-const json = require('./data/champion.json');
 
 const client = new Discord.Client();
+
+/*const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
+
+for (const file of eventFiles) {
+    const event = require(`./events/${file}`);
+    if (event.once) {
+        client.once(event.name, (...args) => event.execute(...args, client));
+    } else {
+        client.on(event.name, (...args) => event.execute(...args, client));
+    }
+    
+}*/
+
 client.commands = new Discord.Collection();
+const cooldowns = new Discord.Collection();
 
 const files = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -18,62 +31,56 @@ for (const file of files) {
     client.commands.set(command.name, command);
 }
 
-client.on('ready', () => {   
-    console.log("Smart Poro esta encendido");
+client.on('ready', (port) => {   
+    console.log(`Smart Poro esta encendido en ${port}`);
 });
 
 client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     const args = message.content.slice(prefix.length).trim().split(/ +/);
-    const command = args.shift().toLowerCase();
+    const commandName = args.shift().toLowerCase();
 
-    if(!client.commands.has(command)) return;
+    const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+    if (!command) return;
+
+    if (command.args && !args.length) {
+        let reply = `No has escrito ningun atributo, ${message.author}!`;
+
+        if (command.usage) {
+            reply += `\nManera correcta es: \`${prefix}${command.name} ${command.usage}\``;
+        }
+
+        return message.channel.send(reply);
+    }
+
+    if (!cooldowns.has(command.name)) {
+        cooldowns.set(command.name, new Discord.Collection());
+    }
+
+    const now = Date.now();
+    const timestamps = cooldowns.get(command.name);
+    const cooldownAmount = (command.cooldown || 3) * 1000;
+
+    if (timestamps.has(message.author.id)) {
+        const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
+
+        if (now < expirationTime) {
+            const timeLeft = (expirationTime - now) / 1000;
+            return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+        }
+    }
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount); // revisar
 
     try {
-        client.commands.get(command).execute(message, args);
+        command.execute(message, args);
     } catch (error) {
         console.error(error);
         message.reply('Error al ejecutar el comando!');
     }
   
 });
-
-
-
-/*client.on('message', message => {
-    if(!message.content.startsWith(prefix)) return;
-
-    const commandBody = message.content.slice(prefix.length);
-    const args = commandBody.split(' ');
-    const command = args.shift().toLocaleLowerCase();
-
-    if(command === "champion") {
-        const champions = json["data"];
-        var name = args.toString();
-        for (i in champions) {
-            //console.log(champions[i]["id"].toLocaleLowerCase());
-            if(!champions[i]["id"].toLocaleLowerCase().includes(name.toLowerCase())) {
-                message.reply("Este campeon no existe");
-                break;
-            } else {
-                const embed = new Discord.MessageEmbed()
-                .setTitle(champions[i]["name"])
-                .setColor(0xff0000)
-                .setDescription(champions[i]["blurb"]);
-                message.channel.send(embed);
-            }
-        } 
-    } else if(command === "object") {
-        const embed = new Discord.MessageEmbed()
-        .setTitle(args)
-        .setColor(0xff0000)
-        .setDescription('Este es el objeto');
-        message.channel.send(embed);
-    } else {
-        message.reply("Este comando no existe");
-    }
-});*/
-
 
 client.login(process.env.TOKEN);

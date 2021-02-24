@@ -1,6 +1,8 @@
 # Folders
 node_modules
 img
+data/en
+
 # Files
 package-lock.json
 .env
