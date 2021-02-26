@@ -1,10 +1,10 @@
 /**
  * Exporta el comando "champion"
- * commands/champion.js
+ * commands/champ/champion.js
  * @author maabro
 */
 const Discord = require('discord.js');
-const { Champion } = require('../classes/Champion');
+const { Champion } = require('../../classes/Champion');
 
 module.exports = {
     name: 'champion',

@@ -27,13 +27,16 @@ for (const file of eventFiles) {
 }*/
 
 client.commands = new Discord.Collection();
+const commandFolders = fs.readdirSync('./commands');
+
 const cooldowns = new Discord.Collection();
 
-const files = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-for (const file of files) {
-    const command = require(`./commands/${file}`);
-    client.commands.set(command.name, command);
+for (const folder of commandFolders) {
+    const files = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+    for (const file of files) {
+        const command = require(`./commands/${folder}/${file}`);
+        client.commands.set(command.name, command);
+    }
 }
 
 client.on('ready', () => {
