@@ -28,12 +28,11 @@ module.exports = {
 
         if (champ.length) {
             const championEmbed = new Discord.MessageEmbed()
-                .setColor('#0099ff')
+                .setColor('#FFBF00')
                 .setTitle(`${ch.name}`)
-                .attachFiles([`./data/img/champion/${champ[0].id}.png`])
-                .setDescription(`${champ[0].title}`)
-                .setThumbnail(`attachment://${champ[0].id}.png`)
-                .addField('Skills','**Q** - Nombre de la Q\n**W** - Nombre de la W\n**E** - Nombre de la E\n**R** - Nombre de la R')
+                .attachFiles([`./data/img/champion/${ch.id}.png`])
+                .setDescription(`${ch.title}`)
+                .setThumbnail(`attachment://${ch.id}.png`)       
                 /*.addFields(
                     //{ name: '\u200B', value: '\u200B' },
                     { name: 'Q', value: `.`, inline: true },
@@ -41,6 +40,7 @@ module.exports = {
                 )
                 .addField('Inline field title', 'Some value here', true)*/
                 .addField('Stats', `${ch.getStats()}`)
+                .addField('Skills',`${ch.getSkills()}`)
                 .setTimestamp()
                 .setFooter('your trusted bot', 'http://ddragon.leagueoflegends.com/cdn/11.4.1/img/profileicon/744.png');
             message.channel.send(championEmbed);

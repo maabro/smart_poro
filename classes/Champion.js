@@ -39,6 +39,10 @@ class Champion {
         return `
         \`\`\`Hp: ${this.stat.hp}(+${this.stat.hpperlevel})\tMp: ${this.stat.mp}(+${this.stat.mpperlevel})\tAtt.: ${this.stat.attackdamage}(+${this.stat.attackdamageperlevel})\n\`\`\``;
     }
+
+    getSkills () {
+        return `\`\`\`Q - !skill ${this.id.toLowerCase()} q\nW - !skill ${this.id.toLowerCase()} w\nE - !skill ${this.id.toLowerCase()} e\nR - !skill ${this.id.toLowerCase()} r\nP - !skill ${this.id.toLowerCase()} p\`\`\``;
+    }
 }
 
 module.exports = {Champion};
