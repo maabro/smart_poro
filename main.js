@@ -7,6 +7,11 @@ const fs = require('fs');
 const { prefix } = require('./config.json');
 const Discord = require('discord.js');
 
+const { Champion } = require('./classes/Champion');
+
+const json = require('./data/en/championFull.json');
+var champions = [];
+
 const client = new Discord.Client();
 
 /*const eventFiles = fs.readdirSync('./events').filter(file => file.endsWith('.js'));
@@ -31,8 +36,17 @@ for (const file of files) {
     client.commands.set(command.name, command);
 }
 
-client.on('ready', (port) => {   
-    console.log(`Smart Poro esta encendido en ${port}`);
+client.on('ready', () => {
+    for (i in json['data']) {
+        let c = Object.create(Champion.prototype);
+        c.setId(json['data'][i].id);
+        c.setName(json['data'][i].name);
+        c.setTitle(json['data'][i].title);
+        c.setStat(json['data'][i].stats);
+        champions.push(c);
+    }
+    console.log(`Smart Poro esta encendido`);
+    console.log(`Load ${champions.length} champions`);
 });
 
 client.on('message', message => {
@@ -75,7 +89,7 @@ client.on('message', message => {
     setTimeout(() => timestamps.delete(message.author.id), cooldownAmount); // revisar
 
     try {
-        command.execute(message, args);
+        command.execute(message, args, champions);
     } catch (error) {
         console.error(error);
         message.reply('Error al ejecutar el comando!');
